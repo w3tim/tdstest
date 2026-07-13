@@ -1,4 +1,5 @@
 using CarPark.Api.Data;
+using CarPark.Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarPark.Api;
@@ -15,6 +16,10 @@ public class Program
         var connectionString = builder.Configuration.GetConnectionString("CarPark")
                                ?? throw new InvalidOperationException(
                                    "Connection string 'CarPark' was not found.");
+
+        builder.Services.AddSingleton(TimeProvider.System);
+        builder.Services.AddSingleton<IParkingChargeCalculator, ParkingChargeCalculator>();
+        builder.Services.AddScoped<ICarParkService, CarParkService>();
 
         builder.Services.AddDbContext<CarParkDbContext>(options =>
             options.UseSqlServer(connectionString));

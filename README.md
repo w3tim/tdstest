@@ -97,7 +97,98 @@ dotnet test
 
 The DBContext integration tests require SQL Server Express LocalDB. Each test creates a unique temporary database, applies the Entity Framework Core migrations and deletes the database when the test completes. The application development database is not used or modified by the tests.
 
-## Planned API behaviour
+## API
+
+The API preserves the PascalCase property names specified in the assessment brief. All response timestamps are returned as UTC values.
+
+Vehicle types and base rates are:
+
+| Value | Vehicle type | Rate |
+| ----: | ------------ | ---: |
+| `1` | Small car | £0.10 per minute |
+| `2` | Medium car | £0.20 per minute |
+| `3` | Large car  | £0.40 per minute |
+
+### Park a vehicle
+
+```http
+POST /parking
+```
+
+Example request:
+
+```json
+{
+  "VehicleReg": "ab12 cde",
+  "VehicleType": 1
+}
+```
+
+Example successful response:
+
+```json
+{
+  "VehicleReg": "AB12CDE",
+  "SpaceNumber": 1,
+  "TimeIn": "2026-07-13T12:13:04.5747228Z"
+}
+```
+
+Possible results:
+
+* `200 OK` — the vehicle was parked successfully.
+* `400 Bad Request` — the registration or vehicle type was invalid.
+* `409 Conflict` — the vehicle is already parked or the car park is full.
+
+### Get parking status
+
+```http
+GET /parking
+```
+
+Example successful response:
+
+```json
+{
+  "AvailableSpaces": 9,
+  "OccupiedSpaces": 1
+}
+```
+
+Result:
+
+* `200 OK`
+
+### Exit a vehicle
+
+```http
+POST /parking/exit
+```
+
+Example request:
+
+```json
+{
+  "VehicleReg": "AB12 CDE"
+}
+```
+
+Example successful response:
+
+```json
+{
+  "VehicleReg": "AB12CDE",
+  "VehicleCharge": 0.1,
+  "TimeIn": "2026-07-13T12:13:04.5747228Z",
+  "TimeOut": "2026-07-13T12:13:47.8331032Z"
+}
+```
+
+Possible results:
+
+* `200 OK` — the vehicle exited successfully.
+* `400 Bad Request` — the registration was invalid.
+* `404 Not Found` — the vehicle is not currently parked.
 
 ## Charging assumptions
 
@@ -132,13 +223,11 @@ Surcharge:         1 × £1.00 = £1.00
 Total:             £2.00
 ```
 
-## Planned Error responses
+## Error responses
 
-The API will return an appropriate HTTP status code for expected errors.
+Request-validation failures use the standard ASP.NET Core validation responses.
 
-Validation errors use the standard ASP.NET Core validation response structure.
-
-Domain errors include a brief message explaining why the operation could not be completed, such as:
+Expected application failures return an appropriate HTTP status code and a brief message:
 
 ```json
 {
@@ -146,15 +235,13 @@ Domain errors include a brief message explaining why the operation could not be 
 }
 ```
 
-Expected error scenarios include:
+Handled scenarios include:
 
-* Missing or empty vehicle registration.
-* Unsupported vehicle type.
-* Attempting to park a vehicle that already has an active session.
-* Attempting to park when the car park is full.
-* Attempting to exit a vehicle that is not currently parked.
-
-Unexpected errors return `500 Internal Server Error` without exposing internal implementation details.
+* Invalid vehicle registrations — `400 Bad Request`.
+* Unsupported vehicle types — `400 Bad Request`.
+* Parking a vehicle that already has an active session — `409 Conflict`.
+* Parking when no space is available — `409 Conflict`.
+* Exiting a vehicle that is not currently parked — `404 Not Found`.
 
 ## Data and seeding
 
@@ -173,7 +260,7 @@ Occupancy is calculated from parking sessions that do not have a `TimeOut`. It i
 
 The initial parking-space data is managed through the Entity Framework Core migration. Applying the migration more than once does not create duplicate spaces.
 
-Vehicle registration are trimed and normalised to uppercase before they are stored or compared.
+Vehicle registrations have whitespace removed and are normalised to uppercase before they are stored or compared.
 
 ## Assumptions and questions
 
@@ -195,7 +282,7 @@ The main questions that would be clarified with the product owner are:
 * Does the additional £1 apply when the billable duration reaches exactly five minutes?
 * What vehicle-registration formats and validation rules must be supported?
 
-Vehicle registrations will be required, trimmed and normalised to uppercase. Full UK registration-format validation has deliberately not been implemented. A reliable regular-expression-based validator should be derived from authoritative official documentation and tested against current and historic registration formats, rather than guessed for this assessment.
+Vehicle registrations have whitespace removed and are normalised to uppercase before they are stored or compared. Full UK registration-format validation has deliberately not been implemented. A reliable regular-expression-based validator should be derived from authoritative official documentation and tested against current and historic registration formats, rather than guessed for this assessment.
 
 ## Production considerations
 

@@ -1,3 +1,22 @@
 @CarPark.Api_HostAddress = http://localhost:5052
 
-### API requests will be added with endpoint implementation
+### Park a vehicle
+POST {{CarPark.Api_HostAddress}}/parking
+Content-Type: application/json
+
+{
+  "VehicleReg": "AB12 CDE",
+  "VehicleType": 1
+}
+
+### Get parking status
+GET {{CarPark.Api_HostAddress}}/parking
+Accept: application/json
+
+### Exit a vehicle
+POST {{CarPark.Api_HostAddress}}/parking/exit
+Content-Type: application/json
+
+{
+  "VehicleReg": "AB12 CDE"
+}

@@ -50,7 +50,7 @@ public class CarParkService(CarParkDbContext dbContext, IParkingChargeCalculator
 
         var session = new ParkingSession
         {
-            VehicleReg = NormaliseReg(reg),
+            VehicleReg = reg,
             VehicleType = (VehicleType)request.VehicleType,
             SpaceNumber = spaceNumber.Value,
             TimeIn = timeProvider.GetUtcNow()

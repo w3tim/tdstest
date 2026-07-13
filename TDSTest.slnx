@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/CarPark.Api/CarPark.Api.csproj" Id="c93dc329-5b97-41b6-a8c6-d20b0cf4f68d" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CarPark.Api.Tests/CarPark.Api.Tests.csproj" Id="d7faeb0f-b0f9-4a11-af48-4bca344c5f30" />
+  </Folder>
+</Solution>

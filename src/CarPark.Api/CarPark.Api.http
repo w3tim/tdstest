@@ -1,0 +1,3 @@
+@CarPark.Api_HostAddress = http://localhost:5052
+
+### API requests will be added with endpoint implementation
